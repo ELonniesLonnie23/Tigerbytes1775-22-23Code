@@ -33,8 +33,8 @@ public class Robot extends TimedRobot {
   PWMVictorSPX driveRightB = new PWMVictorSPX(4);
 
   // arm and intake controls
-  CANSparkMax armXAxis = new CANSparkMax(11, MotorType.kBrushless);
-  PWMVictorSPX armYAxis = new PWMVictorSPX(5);
+  CANSparkMax armYAxis = new CANSparkMax(11, MotorType.kBrushless);
+  PWMVictorSPX armXAxis = new PWMVictorSPX(5);
   PWMVictorSPX intake = new PWMVictorSPX(6);
 
   Joystick driverController = new Joystick(1);
@@ -75,10 +75,10 @@ public class Robot extends TimedRobot {
     driveRightB.setInverted(false);
     
     //arm and intake
-    armXAxis.setInverted(false);
-    armXAxis.setIdleMode(IdleMode.kBrake);
-    ((CANSparkMax) armXAxis).burnFlash();
     armYAxis.setInverted(false);
+    armYAxis.setIdleMode(IdleMode.kBrake);
+    ((CANSparkMax) armYAxis).burnFlash();
+    armXAxis.setInverted(false);
     intake.setInverted(false);
 
     //add a thing on the dashboard to turn off auto if needed
@@ -100,10 +100,10 @@ public class Robot extends TimedRobot {
     //arm control code for autonomous
     if(armUp){
       if(Timer.getFPGATimestamp() - lastBurstTime < armTimeUp){
-        armXAxis.set(armTravel1);
+        armYAxis.set(armTravel1);
       }
       else{
-        armXAxis.set(armHoldUp);
+        armYAxis.set(armHoldUp);
       }
     }
     /*else{
@@ -168,13 +168,13 @@ public class Robot extends TimedRobot {
     double armPower = upAndDown - 0.5;
 
     if (armController.getY() < 0) {
-      armXAxis.set(armPower);
+      armYAxis.set(armPower);
     }
     else if (armController.getY() > 0) {
-      armXAxis.set(-armPower);
+      armYAxis.set(-armPower);
     }
     else {
-      armXAxis.setIdleMode(IdleMode.kBrake);
+      armYAxis.setIdleMode(IdleMode.kBrake);
     }
 
 
@@ -254,8 +254,8 @@ public class Robot extends TimedRobot {
     driveLeftB.set(0);
     driveRightA.set(0);
     driveRightB.set(0);
-    armXAxis.set(0);
     armYAxis.set(0);
+    armXAxis.set(0);
     intake.set(0);
   }
 }
