@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+//import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 /*import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.BreakIterator;
@@ -44,12 +45,20 @@ public class Robot extends TimedRobot {
   //RelativeEncoder
 
   //Constants for controlling the arm. needs adjustments for this robot
-  final double armHoldUp = 0.05;
+  /*final double armHoldUp = 0.05;
   final double armHoldDown = 0.10;
   final double armTravel1 = 0.5;
-
+  final double armTimeDown = 0.5; */
   final double armTimeUp = 0.5;
-  final double armTimeDown = 0.5;
+
+  //current limit for the arm
+  static final int ArmCurrentLimitA = 20;
+
+  //Arm power output
+  static final double ArmOutputPower = 0.1;
+
+  //time to move the arm
+  static final double ArmExtendTime = 2.0;
 
   //Varibles needed for the code
   boolean armUp = true; //Arm initialized to up because that's how it would start a match
@@ -75,8 +84,9 @@ public class Robot extends TimedRobot {
     driveRightB.setInverted(false);
     
     //arm and intake
-    armYAxis.setInverted(false);
+    armYAxis.setInverted(true);
     armYAxis.setIdleMode(IdleMode.kBrake);
+    armYAxis.setSmartCurrentLimit(ArmCurrentLimitA);
     ((CANSparkMax) armYAxis).burnFlash();
     armXAxis.setInverted(false);
     intake.setInverted(false);
@@ -86,6 +96,31 @@ public class Robot extends TimedRobot {
     goForAuto = SmartDashboard.getBoolean("Go For Auto", false);
   }
 
+  /**
+   * *set the arm output power. Positive is out, negative is in
+   * 
+   * @param percent
+   */
+
+  public void setArmYAxisMotor(double percent) {
+    armYAxis.set(percent);
+    SmartDashboard.putNumber("armYAxis power(%)", percent);
+    SmartDashboard.putNumber("arm motor current (amps)", armYAxis.getOutputCurrent());
+    SmartDashboard.putNumber("arm motor temperature(C)", armYAxis.getMotorTemperature());
+  }
+
+  public void setArmXAxisMotor(double percent) {
+    armXAxis.set(percent);
+    SmartDashboard.putNumber("armXaxis power(%)", percent);
+    /*SmartDashboard.putNumber("armXAxis motor current (amps)", armXAxis.get());
+    SmartDashboard.putNumber("armXAxis motor temperature(C)", armXAxis.getMotorTemperature());*/
+  }
+ /**
+  * set the arm output power.
+  *
+  * @param percent desired speed
+  * @param amps current limit
+  */
   @Override
   public void autonomousInit() {
     //get a time for auton start to do events based on time later
@@ -100,10 +135,10 @@ public class Robot extends TimedRobot {
     //arm control code for autonomous
     if(armUp){
       if(Timer.getFPGATimestamp() - lastBurstTime < armTimeUp){
-        armYAxis.set(armTravel1);
+        //armYAxis.set(armTravel1);
       }
       else{
-        armYAxis.set(armHoldUp);
+        //armYAxis.set(armHoldUp);
       }
     }
     /*else{
@@ -160,46 +195,30 @@ public class Robot extends TimedRobot {
     driveLeftB.set(driveLeftPower);
     driveRightA.set(driveRightPower);
     driveRightB.set(driveRightPower);
+    
+    //Code for the arm
+    double armPower;
 
-    // new arm controls. needs fixing
-    //double upAndDown = armController.getRawAxis(1);
-    //final double upAndDown;
-    double upAndDown = - armController.getRawAxis(1);
-    double armPower = upAndDown - 0.5;
-
-    if (armController.getY() < 0) {
-      armYAxis.set(armPower);
+    // motion for the arm in the vertical direction
+    if (armController.getY() > 0.5) {
+      //raise the arm
+      armPower = ArmOutputPower;
     }
-    else if (armController.getY() > 0) {
-      armYAxis.set(-armPower);
+    else if (armController.getY() < -0.5) {
+      //lower the arm
+      armPower = -ArmOutputPower;
     }
     else {
-      armYAxis.setIdleMode(IdleMode.kBrake);
+      //do nothing and let it sit where it is
+      armPower = 0.0;
+      armYAxis.setIdleMode(IdleMode. kBrake);
     }
-
-
-    /*double initialTime = Timer.getFPGATimestamp();
-    double finalTime = Timer.getFPGATimestamp();
-    double timeElapsed = finalTime - initialTime;*/
-
-    //double upAndDown = -armController.getRawAxis(1);
-
-    //double armPower = upAndDown - 0.5;  
-
-    //StopWatch watch = new StopWatch();
-    //watch.start();
+    setArmYAxisMotor(armPower);
     
-    /*armXAxis.set(armPower/4);
-    final double armTravel = armPower * timeElapsed;
-    if (armController.getRawAxis(1)) {
-      armXAxis.set(0);
-    }
 
-    if (armTravel > 0.2) {
-      //armXAxis.set(0);
-      armXAxis.set(0);
-    }*/
+    // motion for the arm in the horizontal direction
     
+
     //Intake controls needs fixing
     if(armController.getRawButton(0)){
       intake.set(1);
@@ -210,39 +229,6 @@ public class Robot extends TimedRobot {
     else{
       intake.set(0);
     }
-
-
-    //Arm Controls
-    
-     /*if(armUp){
-       if(Timer.getFPGATimestamp() - lastBurstTime < armTimeUp){
-        arm.set(armTravel);
-        arm.set(VictorSPXControlMode.PercentOutput, armTravel);
-       }
-       else{
-        arm.set(armHoldUp);
-        arm.set(VictorSPXControlMode.PercentOutput, armHoldUp);
-       }
-     }
-     else{
-       if(Timer.getFPGATimestamp() - lastBurstTime < armTimeDown){
-        arm.set(-armTravel);
-        arm.set(VictorSPXControlMode.PercentOutput, -armTravel);
-      }
-       else{
-        arm.set(-armHoldUp);
-        arm.set(VictorSPXControlMode.PercentOutput, -armHoldDown);
-       }
-     }
-  
-     if(armController.getRawButtonPressed(2) && !armUp){
-       lastBurstTime = Timer.getFPGATimestamp();
-       armUp = true;
-     }
-     else if(armController.getRawButtonPressed(3) && armUp){
-       lastBurstTime = Timer.getFPGATimestamp();
-       armUp = false;
-     }  */
 
    }
 
