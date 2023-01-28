@@ -13,11 +13,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 
 //pneumatics
+//import edu.wpi.first.wpilibj.PneumaticsBase;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 //joysticks
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.XboxController;
 
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -38,19 +40,21 @@ import java.util.concurrent.TimeUnit;*/
 // import edu.wpi.first.wpilibj.motorcontrol.Spark;
 
 public class Robot extends TimedRobot {
-  //Definitions for the hardware
+  //Creating varibales for the motor controllers
   PWMVictorSPX driveLeftA = new PWMVictorSPX(1);
   PWMVictorSPX driveLeftB = new PWMVictorSPX(2);
   PWMVictorSPX driveRightA = new PWMVictorSPX(3);
   PWMVictorSPX driveRightB = new PWMVictorSPX(4);
 
-  // arm controls
+  // variables for the arm controls
   CANSparkMax armYAxis = new CANSparkMax(11, MotorType.kBrushless);
   PWMVictorSPX armXAxis = new PWMVictorSPX(5);
 
-  //pneumatics
-  private final Compressor compressor = new Compressor(null);
-  private final DoubleSolenoid solenoid = new DoubleSolenoid(null, 0, 1);
+  //variables for the pneumatics system
+  private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
+  private final DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
+
+
 
   // joysticks
   Joystick driverController = new Joystick(1);
@@ -83,23 +87,24 @@ public class Robot extends TimedRobot {
    */
   
    @Override
-  public void robotInit() {
-    //Configure motors to turn correct direction. You may have to invert some of your motors
 
-    //drive motors
+  //function for setting the initial conditions of all the hardware
+  public void robotInit() {
+
+    //initial conditions for the drive motors
     driveLeftA.setInverted(true);
     driveLeftB.setInverted(true);
     driveRightA.setInverted(false);
     driveRightB.setInverted(false);
     
-    //arm
+    //initla conditions for the arm
     armYAxis.setInverted(true);
     armYAxis.setIdleMode(IdleMode.kBrake);
     armYAxis.setSmartCurrentLimit(ArmCurrentLimitA);
     ((CANSparkMax) armYAxis).burnFlash();
     armXAxis.setInverted(false);
 
-    //intake
+    //initial conditions for the intake
     compressor.disable();
 
     //add a thing on the dashboard to turn off auto if needed
@@ -136,6 +141,7 @@ public class Robot extends TimedRobot {
   * @param amps current limit
   */
   
+  //function for starting autonomous
   @Override
   public void autonomousInit() {
     //get a time for auton start to do events based on time later
@@ -144,7 +150,7 @@ public class Robot extends TimedRobot {
     goForAuto = SmartDashboard.getBoolean("Go For Auto", false);
   }
 
-  /** This function is called periodically during autonomous. */
+  //function that is called periodically during autonomous
   @Override
   public void autonomousPeriodic() {
     //arm control code for autonomous
@@ -170,17 +176,19 @@ public class Robot extends TimedRobot {
     //get time since start of auto then run drive code for autonomous
     double autoTimeElapsed = Timer.getFPGATimestamp() - autoStart;
     if(goForAuto){
+
       //series of timed events making up the flow of auto
-      //if(autoTimeElapsed < 3){
-        //spit out the ball for three seconds
-        //intake.set(-1);
+      if(autoTimeElapsed < 3){
+        //drop the ball
+        setArmXAxisMotor(0.1);
+        
       }if(autoTimeElapsed < 3){
         //stop spitting out the ball and drive backwards *slowly* for three seconds
         driveLeftA.set(-0.3);
         driveLeftB.set(-0.3);
         driveRightA.set(-0.3);
         driveRightB.set(-0.3);
-      }else{
+      } else {
         //do nothing for the rest of auto
         driveLeftA.set(0);
         driveLeftB.set(0);
@@ -188,6 +196,8 @@ public class Robot extends TimedRobot {
         driveRightB.set(0);
       }
     }
+
+  }
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -261,7 +271,7 @@ public class Robot extends TimedRobot {
     if (armController.getAButton()) {
 
       //enable the compressdor
-      compressor.enableAnalog(10,100);
+      compressor.enableDigital();
 
     } else if (armController.getBButton()) {
 
@@ -271,6 +281,7 @@ public class Robot extends TimedRobot {
 
    }
 
+  //function for disabling everything at the end of the game
   @Override
   public void disabledInit() {
     //On disable turn off everything
