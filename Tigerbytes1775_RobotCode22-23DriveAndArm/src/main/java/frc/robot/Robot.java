@@ -81,7 +81,8 @@ public class Robot extends TimedRobot {
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-  @Override
+  
+   @Override
   public void robotInit() {
     //Configure motors to turn correct direction. You may have to invert some of your motors
 
@@ -134,6 +135,7 @@ public class Robot extends TimedRobot {
   * @param percent desired speed
   * @param amps current limit
   */
+  
   @Override
   public void autonomousInit() {
     //get a time for auton start to do events based on time later
