@@ -268,7 +268,7 @@ public class Robot extends TimedRobot {
     if (armController.getAButton()) {
 
       //enable the compressdor
-      compressor.enableDigital();
+      compressor.enableAnalog(0, 50);
 
     } else if (armController.getBButton()) {
 
