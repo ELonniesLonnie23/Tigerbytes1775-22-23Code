@@ -13,7 +13,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 
 //pneumatics
-//import edu.wpi.first.wpilibj.PneumaticsBase;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
@@ -51,10 +50,8 @@ public class Robot extends TimedRobot {
   PWMVictorSPX armXAxis = new PWMVictorSPX(5);
 
   //variables for the pneumatics system
-  private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
-  private final DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
-
-
+  Compressor compressor = new Compressor(1, PneumaticsModuleType.CTREPCM);
+  DoubleSolenoid solenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
   // joysticks
   Joystick driverController = new Joystick(1);
