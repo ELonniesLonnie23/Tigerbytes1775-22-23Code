@@ -203,7 +203,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    //Set up arcade steer - good to go
+    //Set up arcade steer
     double forward = -driverController.getRawAxis(1);
     double turn = -driverController.getRawAxis(4);
     
