@@ -79,6 +79,13 @@ public class Robot extends TimedRobot {
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
+  //For wheels, if need be please delete-E//
+    private spark driveleftA = new Spark(0);
+    private spark driveLeftB = new Spark(1);
+    private spark driveRightA = new Spark(2);
+    private spark driveRightB = new spark(3);
+  
+  private doulble startTime;
   
    @Override
 
@@ -147,7 +154,18 @@ public class Robot extends TimedRobot {
   //function that is called periodically during autonomous
   @Override
   public void autonomousPeriodic() {
-
+    //For wheels this is what the video said, if need to be deleted feel free-E//
+    double time = Timer.getFPGATimestamp();
+  if (time < 3) {
+    driveLeftA.set(0.6);
+    driveLeftB.set(0.6);
+    driveRightA.set(-0.6);
+    driveRightB.set(-0.6);
+  } else {
+    driveLeftA.set(0);
+    driveLeftB.set(0);
+    driveRightA.set(0);
+    driveRightB.set(0);
   }
 
   /** This function is called once when teleop is enabled. */
